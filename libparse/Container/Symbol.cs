@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace libparse.Container
 {
-    class Symbol : AbstractDataClass
+    public class Symbol : AbstractDataClass
     {
         private Dictionary<string, IDataClass> storedData = new();
 
