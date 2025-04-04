@@ -64,7 +64,7 @@ namespace libparse.Container
                     break;
                 }
                 totalParsedBytes += parsedBytes;
-                slice = data.Slice(parsedBytes);
+                slice = slice.Slice(parsedBytes);
             }
             return totalParsedBytes;
         }

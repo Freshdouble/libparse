@@ -11,7 +11,7 @@ namespace libxcm.Types
         @float,
         @double
     }
-    public class FloatingPointNumber : AbstractNumericalType, IEquatable<FloatingPointNumber>, IEquatable<float>, IEquatable<double>
+    public class FloatingPointNumber : AbstractNumericalType
     {
         public double value = 0;
         private readonly int byteLength;
@@ -39,22 +39,6 @@ namespace libxcm.Types
         public override int ByteLength => byteLength;
 
         public override string ToString() => value.ToString(CultureInfo.InvariantCulture);
-
-        public bool Equals(FloatingPointNumber other)
-        {
-            return value == other.value;
-        }
-
-        public static bool operator ==(FloatingPointNumber lhs, FloatingPointNumber rhs) => lhs != null && lhs.Equals(rhs);
-        public static bool operator !=(FloatingPointNumber lhs, FloatingPointNumber rhs) => !(lhs == rhs);
-
-        public override bool Equals(object obj) => Equals(obj as FloatingPointNumber);
-
-        public override int GetHashCode() => value.GetHashCode();
-
-        public bool Equals(double other) => value == other;
-
-        public bool Equals(float other) => value == other;
 
         public override int GetBytes(Span<byte> data)
         {
@@ -84,26 +68,39 @@ namespace libxcm.Types
 
         public override int ParseBytes(ReadOnlySpan<byte> data)
         {
+            int ret = 0;
             try
             {
                 switch (FloatingPointType)
                 {
                     case FloatingPointType.@float:
                         value = BitConverter.ToSingle(data);
-                        return sizeof(float);
+                        ret = sizeof(float);
+                        break;
                     case FloatingPointType.@double:
                         value = BitConverter.ToDouble(data);
-                        return sizeof(double);
+                        ret = sizeof(double);
+                        break;
+                    default:
+                        throw new ArgumentException("Unkown floatingpoint type");
                 }
             }
             catch(ArgumentOutOfRangeException)
             {
-                return 0;
             }
-            throw new ArgumentException("Unkown floatingpoint type");
+            return ret;
         }
 
-        public static implicit operator float(FloatingPointNumber f) => (float)f.value;
-        public static implicit operator double(FloatingPointNumber f) => (double)f.value;
+        public override double GetTransformed()
+        {
+            if(HasOutputTransform)
+            {
+                return OutputTransform(value);
+            }
+            else
+            {
+                return value;
+            }
+        }
     }
 }

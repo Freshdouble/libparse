@@ -6,7 +6,7 @@ using System.Text;
 
 namespace libxcm.Types
 {
-    public class FixedNumber : AbstractNumericalType, IEquatable<FixedNumber>, IEquatable<long>, IEquatable<int>
+    public class FixedNumber : AbstractNumericalType
     {
         private readonly int bitlength;
         private BigInteger data;
@@ -62,22 +62,6 @@ namespace libxcm.Types
 
         public override int ByteLength => bitlength / 8;
 
-        public bool Equals(FixedNumber other) => data == other.data;
-
-        public static bool operator ==(FixedNumber lhs, FixedNumber rhs) => lhs != null && lhs.Equals(rhs);
-        public static bool operator !=(FixedNumber lhs, FixedNumber rhs) => !(lhs == rhs);
-
-        public static implicit operator int(FixedNumber f) => (int)f.data;
-        public static implicit operator long(FixedNumber f) => (long)f.data;
-
-        public override bool Equals(object obj) => Equals(obj as FixedNumber);
-
-        public override int GetHashCode() => data.GetHashCode();
-
-        public bool Equals(int other) => data == other;
-
-        public bool Equals(long other) => data == other;
-
         public override int GetBytes(Span<byte> data)
         {
             if (this.data.TryWriteBytes(data, out int writtenBytes, !Signed))
@@ -96,6 +80,18 @@ namespace libxcm.Types
             var slice = data.Slice(0, ByteLength);
             this.data = new BigInteger(slice, !Signed);
             return ByteLength;
+        }
+
+        public override double GetTransformed()
+        {
+            if(HasOutputTransform)
+            {
+                return OutputTransform((double)data);
+            }
+            else
+            {
+                return (double)data;
+            }
         }
     }
 }
